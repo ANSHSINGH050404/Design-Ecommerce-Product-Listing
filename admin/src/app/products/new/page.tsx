@@ -18,7 +18,7 @@ export default function NewProductPage() {
     setError("");
     try {
       await api.createProduct(name, description, Number(price), token!);
-      router.push("/admin");
+      router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create product");
     }

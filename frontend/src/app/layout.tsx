@@ -18,12 +18,6 @@ function NavBar() {
           </Link>
           {user ? (
             <>
-              {user.role === "ADMIN" && (
-                <Link href="/admin" className="hover:text-blue-600">
-                  Admin
-                </Link>
-              )}
-              <span className="text-gray-400">|</span>
               <span className="text-gray-600">{user.email}</span>
               <button
                 onClick={logout}

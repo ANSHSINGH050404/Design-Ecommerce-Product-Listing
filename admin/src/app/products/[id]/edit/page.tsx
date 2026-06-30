@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { api, type Product } from "@/lib/api";
+import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
 export default function EditProductPage() {
@@ -17,22 +17,22 @@ export default function EditProductPage() {
 
   useEffect(() => {
     api
-      .getProduct(Number(id))
+      .getProduct(Number(id), token!)
       .then((res) => {
         setName(res.product.name);
         setDescription(res.product.description);
         setPrice(res.product.price);
       })
-      .catch(() => router.push("/admin"))
+      .catch(() => router.push("/"))
       .finally(() => setLoading(false));
-  }, [id, router]);
+  }, [id, token, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     try {
       await api.updateProduct(Number(id), { name, description, price: Number(price) }, token!);
-      router.push("/admin");
+      router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update product");
     }
@@ -83,7 +83,7 @@ export default function EditProductPage() {
           </button>
           <button
             type="button"
-            onClick={() => router.push("/admin")}
+            onClick={() => router.push("/")}
             className="border border-gray-300 px-4 py-2 rounded font-medium hover:bg-gray-100"
           >
             Cancel

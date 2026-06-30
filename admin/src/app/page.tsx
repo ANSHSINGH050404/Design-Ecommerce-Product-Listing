@@ -1,38 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, type Product } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
 export default function AdminDashboard() {
-  const { token } = useAuth();
+  const { user, token, loading } = useAuth();
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
 
-  const fetchProducts = () => {
-    api.getProducts().then((res) => setProducts(res.products));
-  };
-
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    if (loading) return;
+    if (!user || user.role !== "ADMIN") {
+      router.push("/login");
+      return;
+    }
+    api.getProducts(token!).then((res) => setProducts(res.products));
+  }, [user, token, loading, router]);
 
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this product?")) return;
     try {
       await api.deleteProduct(id, token!);
-      fetchProducts();
+      setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       alert(err instanceof Error ? err.message : "Delete failed");
     }
   };
 
+  if (loading) return <p className="text-gray-500">Loading...</p>;
+  if (!user) return null;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold">Dashboard</h1>
         <Link
-          href="/admin/products/new"
+          href="/products/new"
           className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700"
         >
           + Add Product
@@ -62,7 +68,7 @@ export default function AdminDashboard() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link
-                      href={`/admin/products/${p.id}/edit`}
+                      href={`/products/${p.id}/edit`}
                       className="text-blue-600 hover:underline mr-3"
                     >
                       Edit
